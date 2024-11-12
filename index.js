@@ -72,7 +72,27 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server on port 8080
-const port = 8080;
+const port = 3000;
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
+// Import required modules
+const express = require('express');
+const morgan = require('morgan');
+
+const app = express();
+
+// Set the port, defaulting to 8080 if no environment variable is set
+const port = process.env.PORT || 8080;
+
+app.use(morgan('common'));
+
+// Sample route to confirm server is working
+app.get('/', (req, res) => {
+  res.send(`Server is running on port ${port}`);
+});
+
+// Start the server and log the port in use
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
