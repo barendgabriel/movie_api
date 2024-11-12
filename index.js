@@ -71,8 +71,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-// Set the port, defaulting to 8080 if no environment variable is set
-const port = process.env.PORT || 8080;
+// Set the port to 3000
+const port = 3000;
 
 // Start the server and log the port in use
 app.listen(port, () => {
