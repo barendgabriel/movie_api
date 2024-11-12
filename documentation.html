@@ -9,19 +9,90 @@
     <h1>Welcome to the Movie API</h1>
     <p>
       This API allows users to access a collection of movies, including details
-      like title and year of release. You can use various endpoints to interact
-      with the data.
+      like title, year of release, genre, and director. Use the endpoints below
+      to interact with the data.
     </p>
 
     <h2>Endpoints</h2>
     <ul>
       <li>
-        <strong>GET /movies</strong>: Returns a JSON object with a list of 10
-        movies.
+        <strong>GET /movies</strong><br />
+        <em>Description:</em> Returns a JSON array with a list of movies.
+        <ul>
+          <li><strong>Example Response:</strong></li>
+          <pre>
+          [
+            { 
+              "title": "Inception", 
+              "year": 2010, 
+              "director": "Christopher Nolan", 
+              "genre": "Sci-Fi", 
+              "featured": true 
+            },
+            { 
+              "title": "The Matrix", 
+              "year": 1999, 
+              "director": "The Wachowskis", 
+              "genre": "Action", 
+              "featured": false 
+            }
+          ]
+          </pre>
+        </ul>
       </li>
-      <li><strong>GET /</strong>: Displays a welcome message.</li>
+
       <li>
-        <strong>GET /documentation</strong>: Serves this documentation page.
+        <strong>GET /movies/:title</strong><br />
+        <em>Description:</em> Returns data about a specific movie by title.
+        <ul>
+          <li><strong>Parameters:</strong> <code>title</code> (string)</li>
+          <li><strong>Example URL:</strong> <code>/movies/Inception</code></li>
+          <li><strong>Example Response:</strong></li>
+          <pre>
+          {
+            "title": "Inception",
+            "year": 2010,
+            "director": "Christopher Nolan",
+            "genre": "Sci-Fi",
+            "featured": true
+          }
+          </pre>
+        </ul>
+      </li>
+
+      <li>
+        <strong>POST /users</strong><br />
+        <em>Description:</em> Allows a new user to register.
+        <ul>
+          <li><strong>Expected Body:</strong></li>
+          <pre>
+          {
+            "username": "newuser",
+            "password": "userpassword",
+            "email": "user@example.com",
+            "birthday": "1990-01-01"
+          }
+          </pre>
+          <li>
+            <strong>Example Response:</strong> Registration success message
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <strong>GET /</strong><br />
+        <em>Description:</em> Displays a welcome message.
+        <ul>
+          <li>
+            <strong>Example Response:</strong>
+            <code>"Welcome to the Movie API!"</code>
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <strong>GET /documentation</strong><br />
+        <em>Description:</em> Serves this documentation page.
       </li>
     </ul>
   </body>
