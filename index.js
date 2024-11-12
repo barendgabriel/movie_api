@@ -7,6 +7,9 @@ const app = express();
 // Middleware for logging requests
 app.use(morgan('common'));
 
+// Use JSON parsing for POST/PUT requests
+app.use(express.json());
+
 // GET route to return JSON data about movies
 app.get('/movies', (req, res) => {
   res.json([
