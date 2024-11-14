@@ -6,7 +6,7 @@ const app = express();
 
 // Sample movie data
 const movies = [
-  { title: 'Movie 1', year: 2021 },
+  { title: 'Jurrasic park', genre: 'thriller', year: 2021 },
   { title: 'Movie 2', year: 2020 },
   { title: 'Movie 3', year: 2019 },
   { title: 'Movie 4', year: 2018 },
@@ -29,7 +29,7 @@ app.use(express.json());
 
 // Root GET route with a welcome message
 app.get('/', (req, res) => {
-  res.send('Welcome to the Movie API!');
+  res.send('Welcome to the Movie API!!!');
 });
 
 // GET /movies - Returns JSON data about all movies
