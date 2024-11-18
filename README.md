@@ -1,41 +1,57 @@
-Movie API
-A RESTful API designed to provide movie information. This project is set up with essential files for managing dependencies (package.json and package-lock.json) and excludes the node_modules folder for a cleaner repository.
+# Movie API
 
-Features
-Provides detailed movie information
-API endpoints for searching and retrieving movie data
-Getting Started
-Clone the Repository
+A RESTful API for retrieving detailed movie information, including title, year of release, genre, and director. This project provides API endpoints for searching and retrieving movie data.
+
+## Features
+
+- Retrieve detailed movie information
+- Filter movies by title, genre, and director
+- Add movies to a user's favorites list
+- Update movie descriptions and director bios
+- Register new users
+
+## Getting Started
+
+### Clone the Repository
+
 Clone the repository to your local machine:
 
-bash
-Copy code
+```bash
 git clone https://github.com/barendgabriel/movie_api.git
-Navigate to Project Directory
+```
+
+### Navigate to Project Directory
+
 Change to the project directory:
 
-bash
-Copy code
+```bash
 cd movie_api
-Install Dependencies
+```
+
+### Install Dependencies
+
 Run the following command to install necessary packages:
 
-bash
-Copy code
+```bash
 npm install
-Run the Application
+```
+
+### Run the Application
+
 Start the server with:
 
-bash
-Copy code
+```bash
 npm start
-Project Structure
-The project includes:
+```
 
-index.js: Main entry point for the application
-package.json: Lists project dependencies
-package-lock.json: Records the exact version of installed packages
-.gitignore: Excludes node_modules from version control
-Notes
-Ensure the .gitignore file contains node_modules/ to keep it out of the repository.
-If you need to run the application, ensure you have Node.js installed.
+## Project Structure
+
+- **index.js**: Main entry point for the application
+- **package.json**: Lists project dependencies
+- **package-lock.json**: Records the exact version of installed packages
+- **.gitignore**: Excludes `node_modules` from version control
+
+## Notes
+
+- Ensure the `.gitignore` file includes `node_modules/` to keep it out of the repository.
+- You must have Node.js installed to run the application.
