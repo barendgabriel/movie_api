@@ -15,9 +15,9 @@ app.use(morgan('common'));
 // Use JSON parsing for POST/PUT requests
 app.use(express.json());
 
-// Connect to MongoDB database (only once)
+// Connect to MongoDB database (update to 'myFlixDB')
 mongoose
-  .connect('mongodb://localhost:27017/movieAPI', {
+  .connect('mongodb://localhost:27017/myFlixDB', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
