@@ -42,7 +42,7 @@ app.get('/movies', (req, res) => {
 // GET /movies/:title - Returns data about a specific movie by title
 app.get('/movies/:title', (req, res) => {
   const { title } = req.params;
-  Movies.findOne({ title: title })
+  Movies.findOne({ Title: title }) // Match case with the schema
     .then((movie) => {
       if (movie) {
         res.json(movie);
@@ -60,7 +60,12 @@ app.get('/movies/:title', (req, res) => {
 app.post('/users', (req, res) => {
   const { username, password, email, birthday } = req.body;
   if (username && password && email && birthday) {
-    Users.create({ username, password, email, birthday })
+    Users.create({
+      Username: username,
+      Password: password,
+      Email: email,
+      Birthday: birthday,
+    })
       .then((user) => res.json({ message: 'Registration successful', user }))
       .catch((err) => {
         console.error(err);
@@ -86,8 +91,4 @@ const port = 3000;
 // Start the server and log the port in use
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
-});
-mongoose.connect('mongodb://localhost:27017/myFlixDB', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
 });
