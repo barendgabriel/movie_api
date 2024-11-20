@@ -15,7 +15,6 @@
 
     <h2>Endpoints</h2>
     <ul>
-      <!-- Existing Endpoints -->
       <li>
         <strong>GET /movies</strong><br />
         <em>Description:</em> Returns a JSON array with a list of movies.
@@ -23,19 +22,37 @@
           <li><strong>Example Response:</strong></li>
           <pre>
           [
-            { 
-              "title": "Inception", 
-              "year": 2010, 
-              "director": "Christopher Nolan", 
-              "genre": "Sci-Fi", 
-              "featured": true 
+            {
+              "title": "Inception",
+              "description": "A mind-bending thriller where a thief enters dreams.",
+              "genre": {
+                "name": "Sci-Fi",
+                "description": "Science Fiction"
+              },
+              "director": {
+                "name": "Christopher Nolan",
+                "bio": "British-American filmmaker known for thought-provoking films with complex narratives.",
+                "birthYear": 1970,
+                "deathYear": null
+              },
+              "imageURL": "https://example.com/inception.jpg",
+              "featured": true
             },
-            { 
-              "title": "The Matrix", 
-              "year": 1999, 
-              "director": "The Wachowskis", 
-              "genre": "Action", 
-              "featured": false 
+            {
+              "title": "The Matrix",
+              "description": "A hacker discovers the truth about reality in a simulated world.",
+              "genre": {
+                "name": "Sci-Fi",
+                "description": "Science Fiction"
+              },
+              "director": {
+                "name": "Lana Wachowski",
+                "bio": "American filmmaker and writer.",
+                "birthYear": 1965,
+                "deathYear": null
+              },
+              "imageURL": "https://example.com/matrix.jpg",
+              "featured": false
             }
           ]
           </pre>
@@ -52,11 +69,68 @@
           <pre>
           {
             "title": "Inception",
-            "year": 2010,
-            "director": "Christopher Nolan",
-            "genre": "Sci-Fi",
+            "description": "A mind-bending thriller where a thief enters dreams.",
+            "genre": {
+              "name": "Sci-Fi",
+              "description": "Science Fiction"
+            },
+            "director": {
+              "name": "Christopher Nolan",
+              "bio": "British-American filmmaker known for thought-provoking films with complex narratives.",
+              "birthYear": 1970,
+              "deathYear": null
+            },
+            "imageURL": "https://example.com/inception.jpg",
             "featured": true
           }
+          </pre>
+        </ul>
+      </li>
+
+      <li>
+        <strong>GET /movies/genre/:genre</strong><br />
+        <em>Description:</em> Returns all movies from a specific genre.
+        <ul>
+          <li><strong>Parameters:</strong> <code>genre</code> (string)</li>
+          <li>
+            <strong>Example URL:</strong> <code>/movies/genre/Sci-Fi</code>
+          </li>
+          <li><strong>Example Response:</strong></li>
+          <pre>
+          [
+            {
+              "title": "Inception",
+              "description": "A mind-bending thriller where a thief enters dreams.",
+              "genre": {
+                "name": "Sci-Fi",
+                "description": "Science Fiction"
+              },
+              "director": {
+                "name": "Christopher Nolan",
+                "bio": "British-American filmmaker known for thought-provoking films with complex narratives.",
+                "birthYear": 1970,
+                "deathYear": null
+              },
+              "imageURL": "https://example.com/inception.jpg",
+              "featured": true
+            },
+            {
+              "title": "The Matrix",
+              "description": "A hacker discovers the truth about reality in a simulated world.",
+              "genre": {
+                "name": "Sci-Fi",
+                "description": "Science Fiction"
+              },
+              "director": {
+                "name": "Lana Wachowski",
+                "bio": "American filmmaker and writer.",
+                "birthYear": 1965,
+                "deathYear": null
+              },
+              "imageURL": "https://example.com/matrix.jpg",
+              "featured": false
+            }
+          ]
           </pre>
         </ul>
       </li>
@@ -74,159 +148,8 @@
             "birthday": "1990-01-01"
           }
           </pre>
-          <li>
-            <strong>Example Response:</strong> Registration success message
-          </li>
-        </ul>
-      </li>
-
-      <!-- New Endpoints for "READ" Queries -->
-      <li>
-        <strong>GET /movies/genre/:genre</strong><br />
-        <em>Description:</em> Returns all movies from a specific genre.
-        <ul>
-          <li><strong>Parameters:</strong> <code>genre</code> (string)</li>
-          <li>
-            <strong>Example URL:</strong> <code>/movies/genre/Sci-Fi</code>
-          </li>
-          <li><strong>Example Response:</strong></li>
-          <pre>
-          [
-            { 
-              "title": "Inception", 
-              "year": 2010, 
-              "director": "Christopher Nolan", 
-              "genre": "Sci-Fi", 
-              "featured": true 
-            },
-            { 
-              "title": "Interstellar", 
-              "year": 2014, 
-              "director": "Christopher Nolan", 
-              "genre": "Sci-Fi", 
-              "featured": true 
-            }
-          ]
-          </pre>
-        </ul>
-      </li>
-
-      <li>
-        <strong>GET /movies/director/:director/genre/:genre</strong><br />
-        <em>Description:</em> Returns all movies that match both a specific
-        director and genre.
-        <ul>
-          <li>
-            <strong>Parameters:</strong> <code>director</code> (string),
-            <code>genre</code> (string)
-          </li>
-          <li>
-            <strong>Example URL:</strong>
-            <code>/movies/director/Christopher%20Nolan/genre/Sci-Fi</code>
-          </li>
-          <li><strong>Example Response:</strong></li>
-          <pre>
-          [
-            { 
-              "title": "Inception", 
-              "year": 2010, 
-              "director": "Christopher Nolan", 
-              "genre": "Sci-Fi", 
-              "featured": true 
-            }
-          ]
-          </pre>
-        </ul>
-      </li>
-
-      <!-- New Endpoints for "UPDATE" Queries -->
-      <li>
-        <strong>PUT /movies/:title/description</strong><br />
-        <em>Description:</em> Update the description of a specific movie.
-        <ul>
-          <li><strong>Parameters:</strong> <code>title</code> (string)</li>
-          <li><strong>Expected Body:</strong></li>
-          <pre>
-          {
-            "description": "Updated description for the movie."
-          }
-          </pre>
-          <li>
-            <strong>Example URL:</strong>
-            <code>/movies/Inception/description</code>
-          </li>
           <li><strong>Example Response:</strong> Confirmation message</li>
         </ul>
-      </li>
-
-      <li>
-        <strong>PUT /directors/:director/bio</strong><br />
-        <em>Description:</em> Update the biography of a director.
-        <ul>
-          <li><strong>Parameters:</strong> <code>director</code> (string)</li>
-          <li><strong>Expected Body:</strong></li>
-          <pre>
-          {
-            "bio": "Updated biography for the director."
-          }
-          </pre>
-          <li>
-            <strong>Example URL:</strong>
-            <code>/directors/Christopher%20Nolan/bio</code>
-          </li>
-          <li><strong>Example Response:</strong> Confirmation message</li>
-        </ul>
-      </li>
-
-      <li>
-        <strong>PUT /users/:username/favorites</strong><br />
-        <em>Description:</em> Add a movie to a user's list of favorites.
-        <ul>
-          <li><strong>Parameters:</strong> <code>username</code> (string)</li>
-          <li><strong>Expected Body:</strong></li>
-          <pre>
-          {
-            "movieId": "movieObjectId"
-          }
-          </pre>
-          <li>
-            <strong>Example URL:</strong> <code>/users/johndoe/favorites</code>
-          </li>
-          <li><strong>Example Response:</strong> Confirmation message</li>
-        </ul>
-      </li>
-
-      <!-- New Endpoint for "DELETE" Queries -->
-      <li>
-        <strong>DELETE /users/:username</strong><br />
-        <em>Description:</em> Delete a user by their username.
-        <ul>
-          <li><strong>Parameters:</strong> <code>username</code> (string)</li>
-          <li><strong>Example URL:</strong> <code>/users/johndoe</code></li>
-          <li><strong>Example Response:</strong></li>
-          <pre>
-          { 
-            "message": "User johndoe has been deleted successfully."
-          }
-          </pre>
-        </ul>
-      </li>
-
-      <!-- Existing Endpoints -->
-      <li>
-        <strong>GET /</strong><br />
-        <em>Description:</em> Displays a welcome message.
-        <ul>
-          <li>
-            <strong>Example Response:</strong>
-            <code>"Welcome to the Movie API!"</code>
-          </li>
-        </ul>
-      </li>
-
-      <li>
-        <strong>GET /documentation</strong><br />
-        <em>Description:</em> Serves this documentation page.
       </li>
     </ul>
   </body>
