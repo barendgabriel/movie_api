@@ -31,11 +31,16 @@ app.get('/', (req, res) => {
 
 // GET /movies - Returns JSON data about all movies from the database
 app.get('/movies', (req, res) => {
-  Movies.find()
-    .then((movies) => res.json(movies))
+  console.log('Fetching all movies...'); // Log the action of fetching movies
+
+  Movies.find() // Query MongoDB for all movies
+    .then((movies) => {
+      console.log('Movies retrieved:', movies); // Log the retrieved movies
+      res.json(movies); // Respond with the movies in JSON format
+    })
     .catch((err) => {
-      console.error(err);
-      res.status(500).json({ error: 'Error retrieving movies' });
+      console.error('Error retrieving movies:', err); // Log any errors
+      res.status(500).json({ error: 'Error retrieving movies' }); // Respond with an error message
     });
 });
 
