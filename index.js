@@ -1,25 +1,13 @@
 // Import required modules
 const express = require('express');
 const morgan = require('morgan');
+const mongoose = require('mongoose'); // Import Mongoose for MongoDB interactions
+const Models = require('./models.js'); // Import Mongoose models
+
+const Movies = Models.Movie; // Assign the Movie model to a constant for easy access
+const Users = Models.User; // Assign the User model to a constant for easy access
 
 const app = express();
-
-// Sample movie data
-const movies = [
-  { title: 'Jurrasic park', genre: 'thriller', year: 2021 },
-  { title: 'Movie 2', year: 2020 },
-  { title: 'Movie 3', year: 2019 },
-  { title: 'Movie 4', year: 2018 },
-  { title: 'Movie 5', year: 2017 },
-  { title: 'Movie 6', year: 2016 },
-  { title: 'Movie 7', year: 2015 },
-  { title: 'Movie 8', year: 2014 },
-  { title: 'Movie 9', year: 2013 },
-  { title: 'Movie 10', year: 2012 },
-];
-
-// Sample user data array
-const users = [];
 
 // Middleware for logging requests
 app.use(morgan('common'));
@@ -27,36 +15,57 @@ app.use(morgan('common'));
 // Use JSON parsing for POST/PUT requests
 app.use(express.json());
 
+// Connect to MongoDB database
+mongoose
+  .connect('mongodb://localhost:27017/movieAPI', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((err) => console.error('MongoDB connection error:', err));
+
 // Root GET route with a welcome message
 app.get('/', (req, res) => {
   res.send('Welcome to the Movie API!!!');
 });
 
-// GET /movies - Returns JSON data about all movies
+// GET /movies - Returns JSON data about all movies from the database
 app.get('/movies', (req, res) => {
-  res.json(movies);
+  Movies.find()
+    .then((movies) => res.json(movies))
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: 'Error retrieving movies' });
+    });
 });
 
 // GET /movies/:title - Returns data about a specific movie by title
 app.get('/movies/:title', (req, res) => {
   const { title } = req.params;
-  const movie = movies.find(
-    (m) => m.title.toLowerCase() === title.toLowerCase()
-  );
-  if (movie) {
-    res.json(movie);
-  } else {
-    res.status(404).json({ error: 'Movie not found' });
-  }
+  Movies.findOne({ title: title })
+    .then((movie) => {
+      if (movie) {
+        res.json(movie);
+      } else {
+        res.status(404).json({ error: 'Movie not found' });
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: 'Error retrieving movie' });
+    });
 });
 
 // POST /users - Allows a new user to register
 app.post('/users', (req, res) => {
   const { username, password, email, birthday } = req.body;
   if (username && password && email && birthday) {
-    const newUser = { username, password, email, birthday };
-    users.push(newUser);
-    res.json({ message: 'Registration successful', user: newUser });
+    Users.create({ username, password, email, birthday })
+      .then((user) => res.json({ message: 'Registration successful', user }))
+      .catch((err) => {
+        console.error(err);
+        res.status(500).json({ error: 'Error registering user' });
+      });
   } else {
     res.status(400).json({ error: 'Please provide all required fields' });
   }
@@ -77,4 +86,8 @@ const port = 3000;
 // Start the server and log the port in use
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
+});
+mongoose.connect('mongodb://localhost:27017/myFlixDB', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 });
