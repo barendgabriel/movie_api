@@ -6,150 +6,108 @@
     <title>Movie API Documentation</title>
   </head>
   <body>
-    <h1>Welcome to the Movie API</h1>
+    <h1>Movie API Documentation</h1>
     <p>
-      This API allows users to access a collection of movies, including details
-      like title, year of release, genre, and director. Use the endpoints below
-      to interact with the data.
+      Welcome to the Movie API documentation. Below you'll find information
+      about the available endpoints and their usage.
     </p>
 
     <h2>Endpoints</h2>
+
+    <h3>GET /movies</h3>
+    <p>Returns a list of all movies in the database.</p>
+    <p><strong>Response Example:</strong></p>
+    <pre>
+[
+  {
+    "_id": "123456",
+    "title": "Inception",
+    "description": "A mind-bending thriller.",
+    "genre": { "name": "Sci-Fi", "description": "Science Fiction" },
+    "director": { "name": "Christopher Nolan", "bio": "British-American filmmaker." },
+    "featured": true
+  },
+  ...
+]
+    </pre>
+
+    <h3>GET /movies/:title</h3>
+    <p>Returns data about a specific movie by title (case-insensitive).</p>
+    <p><strong>URL Example:</strong> <code>/movies/Inception</code></p>
+
+    <h3>GET /directors</h3>
+    <p>
+      Returns a list of all unique directors from the database, including their
+      bios.
+    </p>
+    <p><strong>Response Example:</strong></p>
+    <pre>
+[
+  { "_id": "Christopher Nolan", "bio": "British-American filmmaker." },
+  { "_id": "Quentin Tarantino", "bio": "Known for his stylized films." }
+]
+    </pre>
+
+    <h3>GET /genres</h3>
+    <p>Returns a list of all unique genres in the database.</p>
+    <p><strong>Response Example:</strong></p>
+    <pre>
+[
+  { "_id": "Sci-Fi", "description": "Science Fiction" },
+  { "_id": "Drama", "description": "Serious narrative films." }
+]
+    </pre>
+
+    <h3>GET /users</h3>
+    <p>Returns a list of all registered users.</p>
+    <p><strong>Response Example:</strong></p>
+    <pre>
+[
+  {
+    "_id": "abcdef",
+    "Username": "john_doe",
+    "Email": "john@example.com",
+    "Birthday": "1990-01-01T00:00:00.000Z",
+    "FavoriteMovies": []
+  },
+  ...
+]
+    </pre>
+
+    <h3>POST /users</h3>
+    <p>Allows a new user to register.</p>
+    <p><strong>Request Body:</strong></p>
+    <pre>
+{
+  "username": "john_doe",
+  "password": "password123",
+  "email": "john@example.com",
+  "birthday": "1990-01-01"
+}
+    </pre>
+    <p><strong>Response Example:</strong></p>
+    <pre>
+{
+  "message": "Registration successful",
+  "user": {
+    "_id": "abcdef",
+    "Username": "john_doe",
+    "Email": "john@example.com",
+    "Birthday": "1990-01-01T00:00:00.000Z",
+    "FavoriteMovies": []
+  }
+}
+    </pre>
+
+    <h3>Error Responses</h3>
+    <p>All endpoints may return the following errors:</p>
     <ul>
       <li>
-        <strong>GET /movies</strong><br />
-        <em>Description:</em> Returns a JSON array with a list of movies.
-        <ul>
-          <li><strong>Example Response:</strong></li>
-          <pre>
-          [
-            {
-              "title": "Inception",
-              "description": "A mind-bending thriller where a thief enters dreams.",
-              "genre": {
-                "name": "Sci-Fi",
-                "description": "Science Fiction"
-              },
-              "director": {
-                "name": "Christopher Nolan",
-                "bio": "British-American filmmaker known for thought-provoking films with complex narratives.",
-                "birthYear": 1970,
-                "deathYear": null
-              },
-              "imageURL": "https://example.com/inception.jpg",
-              "featured": true
-            },
-            {
-              "title": "The Matrix",
-              "description": "A hacker discovers the truth about reality in a simulated world.",
-              "genre": {
-                "name": "Sci-Fi",
-                "description": "Science Fiction"
-              },
-              "director": {
-                "name": "Lana Wachowski",
-                "bio": "American filmmaker and writer.",
-                "birthYear": 1965,
-                "deathYear": null
-              },
-              "imageURL": "https://example.com/matrix.jpg",
-              "featured": false
-            }
-          ]
-          </pre>
-        </ul>
+        <strong>500 Internal Server Error:</strong> If something goes wrong on
+        the server side.
       </li>
-
       <li>
-        <strong>GET /movies/:title</strong><br />
-        <em>Description:</em> Returns data about a specific movie by title.
-        <ul>
-          <li><strong>Parameters:</strong> <code>title</code> (string)</li>
-          <li><strong>Example URL:</strong> <code>/movies/Inception</code></li>
-          <li><strong>Example Response:</strong></li>
-          <pre>
-          {
-            "title": "Inception",
-            "description": "A mind-bending thriller where a thief enters dreams.",
-            "genre": {
-              "name": "Sci-Fi",
-              "description": "Science Fiction"
-            },
-            "director": {
-              "name": "Christopher Nolan",
-              "bio": "British-American filmmaker known for thought-provoking films with complex narratives.",
-              "birthYear": 1970,
-              "deathYear": null
-            },
-            "imageURL": "https://example.com/inception.jpg",
-            "featured": true
-          }
-          </pre>
-        </ul>
-      </li>
-
-      <li>
-        <strong>GET /movies/genre/:genre</strong><br />
-        <em>Description:</em> Returns all movies from a specific genre.
-        <ul>
-          <li><strong>Parameters:</strong> <code>genre</code> (string)</li>
-          <li>
-            <strong>Example URL:</strong> <code>/movies/genre/Sci-Fi</code>
-          </li>
-          <li><strong>Example Response:</strong></li>
-          <pre>
-          [
-            {
-              "title": "Inception",
-              "description": "A mind-bending thriller where a thief enters dreams.",
-              "genre": {
-                "name": "Sci-Fi",
-                "description": "Science Fiction"
-              },
-              "director": {
-                "name": "Christopher Nolan",
-                "bio": "British-American filmmaker known for thought-provoking films with complex narratives.",
-                "birthYear": 1970,
-                "deathYear": null
-              },
-              "imageURL": "https://example.com/inception.jpg",
-              "featured": true
-            },
-            {
-              "title": "The Matrix",
-              "description": "A hacker discovers the truth about reality in a simulated world.",
-              "genre": {
-                "name": "Sci-Fi",
-                "description": "Science Fiction"
-              },
-              "director": {
-                "name": "Lana Wachowski",
-                "bio": "American filmmaker and writer.",
-                "birthYear": 1965,
-                "deathYear": null
-              },
-              "imageURL": "https://example.com/matrix.jpg",
-              "featured": false
-            }
-          ]
-          </pre>
-        </ul>
-      </li>
-
-      <li>
-        <strong>POST /users</strong><br />
-        <em>Description:</em> Allows a new user to register.
-        <ul>
-          <li><strong>Expected Body:</strong></li>
-          <pre>
-          {
-            "username": "newuser",
-            "password": "userpassword",
-            "email": "user@example.com",
-            "birthday": "1990-01-01"
-          }
-          </pre>
-          <li><strong>Example Response:</strong> Confirmation message</li>
-        </ul>
+        <strong>404 Not Found:</strong> If the requested resource is not found.
       </li>
     </ul>
   </body>
