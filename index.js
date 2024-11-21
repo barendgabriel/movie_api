@@ -31,23 +31,17 @@ app.get('/', (req, res) => {
 
 // GET /movies - Returns JSON data about all movies from the database
 app.get('/movies', (req, res) => {
-  console.log('Fetching all movies...'); // Log the action of fetching movies
-
-  Movies.find() // Query MongoDB for all movies
-    .then((movies) => {
-      console.log('Movies retrieved:', movies); // Log the retrieved movies
-      res.json(movies); // Respond with the movies in JSON format
-    })
+  Movies.find()
+    .then((movies) => res.json(movies))
     .catch((err) => {
-      console.error('Error retrieving movies:', err); // Log any errors
-      res.status(500).json({ error: 'Error retrieving movies' }); // Respond with an error message
+      console.error('Error retrieving movies:', err);
+      res.status(500).json({ error: 'Error retrieving movies' });
     });
 });
 
 // GET /movies/:title - Returns data about a specific movie by title
 app.get('/movies/:title', (req, res) => {
   const { title } = req.params;
-  // Use case-insensitive search for the movie title
   Movies.findOne({ title: { $regex: new RegExp('^' + title + '$', 'i') } })
     .then((movie) => {
       if (movie) {
@@ -62,21 +56,42 @@ app.get('/movies/:title', (req, res) => {
     });
 });
 
-// GET /directors - Returns a list of all directors from the database
+// GET /directors - Returns a list of all distinct directors from the database
 app.get('/directors', (req, res) => {
-  console.log('Fetching all directors...'); // Log the action of fetching directors
-
   Movies.aggregate([
-    { $unwind: '$director' }, // Flatten the "director" field (if it's an array)
-    { $group: { _id: '$director.name' } }, // Group by the director's name to get distinct directors
+    { $group: { _id: '$director.name', bio: { $first: '$director.bio' } } },
   ])
-    .then((directors) => {
-      console.log('Directors retrieved:', directors); // Log the retrieved directors
-      res.json(directors); // Respond with the directors in JSON format
-    })
+    .then((directors) => res.json(directors))
     .catch((err) => {
-      console.error('Error retrieving directors:', err); // Log any errors
-      res.status(500).json({ error: 'Error retrieving directors' }); // Respond with an error message
+      console.error('Error retrieving directors:', err);
+      res.status(500).json({ error: 'Error retrieving directors' });
+    });
+});
+
+// GET /genres - Returns a list of all distinct genres from the database
+app.get('/genres', (req, res) => {
+  Movies.aggregate([
+    {
+      $group: {
+        _id: '$genre.name',
+        description: { $first: '$genre.description' },
+      },
+    },
+  ])
+    .then((genres) => res.json(genres))
+    .catch((err) => {
+      console.error('Error retrieving genres:', err);
+      res.status(500).json({ error: 'Error retrieving genres' });
+    });
+});
+
+// GET /users - Returns JSON data about all users
+app.get('/users', (req, res) => {
+  Users.find()
+    .then((users) => res.json(users))
+    .catch((err) => {
+      console.error('Error retrieving users:', err);
+      res.status(500).json({ error: 'Error retrieving users' });
     });
 });
 
