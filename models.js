@@ -41,12 +41,14 @@ userSchema.pre('save', function (next) {
   });
 });
 
-// Method to compare passwords during login
-userSchema.methods.comparePassword = function (candidatePassword, callback) {
-  bcrypt.compare(candidatePassword, this.Password, (err, isMatch) => {
-    if (err) return callback(err);
-    callback(null, isMatch);
-  });
+// Function to hash the password
+userSchema.statics.hashPassword = (password) => {
+  return bcrypt.hashSync(password, 10);
+};
+
+// Method to validate the password during login
+userSchema.methods.validatePassword = function (password) {
+  return bcrypt.compareSync(password, this.Password);
 };
 
 // Create the Movie and User models
