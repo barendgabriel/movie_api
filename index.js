@@ -1,19 +1,26 @@
 // Import required modules
+const bcrypt = require('bcrypt');
 const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose'); // Import Mongoose for MongoDB interactions
 const Models = require('./models.js'); // Import Mongoose models
+const passport = require('passport');
+const cors = require('cors'); // Import CORS to handle cross-origin requests
+
+// Import passport strategies
+require('./passport'); // Passport strategies
 
 const Movies = Models.Movie; // Assign the Movie model to a constant for easy access
 const Users = Models.User; // Assign the User model to a constant for easy access
 
-const app = express(); // Initialize the Express app
+const app = express();
 
 // Middleware for logging requests
 app.use(morgan('common'));
 
 // Use JSON parsing for POST/PUT requests
 app.use(express.json());
+app.use(cors()); // Allow cross-origin requests
 
 // Correct MongoDB connection string (using port 27017, not 3000)
 mongoose
@@ -24,7 +31,7 @@ mongoose
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// Import and use the Auth module **after app is initialized**
+// Import and use the auth routes for login
 let auth = require('./auth')(app); // Use Auth to handle login and JWT
 
 // Root GET route with a welcome message
@@ -98,21 +105,31 @@ app.get('/users', (req, res) => {
     });
 });
 
-// POST /users - Allows a new user to register
+// POST /users - Allows a new user to register with password hashing
 app.post('/users', (req, res) => {
   const { username, password, email, birthday } = req.body;
+
   if (username && password && email && birthday) {
-    Users.create({
-      Username: username,
-      Password: password,
-      Email: email,
-      Birthday: birthday,
-    })
-      .then((user) => res.json({ message: 'Registration successful', user }))
-      .catch((err) => {
+    // Hash the password before saving the user
+    bcrypt.hash(password, 10, (err, hashedPassword) => {
+      if (err) {
         console.error(err);
-        res.status(500).json({ error: 'Error registering user' });
-      });
+        return res.status(500).json({ error: 'Error hashing password' });
+      }
+
+      // Create new user with the hashed password
+      Users.create({
+        Username: username,
+        Password: hashedPassword,
+        Email: email,
+        Birthday: birthday,
+      })
+        .then((user) => res.json({ message: 'Registration successful', user }))
+        .catch((err) => {
+          console.error(err);
+          res.status(500).json({ error: 'Error registering user' });
+        });
+    });
   } else {
     res.status(400).json({ error: 'Please provide all required fields' });
   }
