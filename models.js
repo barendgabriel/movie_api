@@ -1,4 +1,5 @@
 const mongoose = require('mongoose'); // Import mongoose
+const bcrypt = require('bcrypt'); // Import bcrypt for password hashing
 
 // Define the movie schema
 let movieSchema = mongoose.Schema({
@@ -25,6 +26,28 @@ let userSchema = mongoose.Schema({
   Birthday: Date,
   FavoriteMovies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Movie' }],
 });
+
+// Add a pre-save hook to hash the password before saving
+userSchema.pre('save', function (next) {
+  const user = this;
+
+  if (!user.isModified('Password')) return next(); // Only hash the password if it's modified or new
+
+  // Hash the password
+  bcrypt.hash(user.Password, 10, (err, hashedPassword) => {
+    if (err) return next(err);
+    user.Password = hashedPassword;
+    next();
+  });
+});
+
+// Method to compare passwords during login
+userSchema.methods.comparePassword = function (candidatePassword, callback) {
+  bcrypt.compare(candidatePassword, this.Password, (err, isMatch) => {
+    if (err) return callback(err);
+    callback(null, isMatch);
+  });
+};
 
 // Create the Movie and User models
 let Movie = mongoose.model('Movie', movieSchema);
