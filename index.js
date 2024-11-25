@@ -3,14 +3,11 @@ const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose'); // Import Mongoose for MongoDB interactions
 const Models = require('./models.js'); // Import Mongoose models
-const passport = require('passport'); // Add Passport for authentication
-require('./passport'); // Ensure Passport strategies are configured
-let auth = require('./auth')(app); // Use Auth to handle login and JWT
 
 const Movies = Models.Movie; // Assign the Movie model to a constant for easy access
 const Users = Models.User; // Assign the User model to a constant for easy access
 
-const app = express();
+const app = express(); // Initialize the Express app
 
 // Middleware for logging requests
 app.use(morgan('common'));
@@ -27,98 +24,81 @@ mongoose
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
+// Import and use the Auth module **after app is initialized**
+let auth = require('./auth')(app); // Use Auth to handle login and JWT
+
 // Root GET route with a welcome message
 app.get('/', (req, res) => {
   res.send('Welcome to the Movie API!!!');
 });
 
-// GET /movies - Returns JSON data about all movies from the database (JWT protected)
-app.get(
-  '/movies',
-  passport.authenticate('jwt', { session: false }),
-  (req, res) => {
-    Movies.find()
-      .then((movies) => res.json(movies))
-      .catch((err) => {
-        console.error('Error retrieving movies:', err);
-        res.status(500).json({ error: 'Error retrieving movies' });
-      });
-  }
-);
+// GET /movies - Returns JSON data about all movies from the database
+app.get('/movies', (req, res) => {
+  Movies.find()
+    .then((movies) => res.json(movies))
+    .catch((err) => {
+      console.error('Error retrieving movies:', err);
+      res.status(500).json({ error: 'Error retrieving movies' });
+    });
+});
 
-// GET /movies/:title - Returns data about a specific movie by title (JWT protected)
-app.get(
-  '/movies/:title',
-  passport.authenticate('jwt', { session: false }),
-  (req, res) => {
-    const { title } = req.params;
-    Movies.findOne({ title: { $regex: new RegExp('^' + title + '$', 'i') } })
-      .then((movie) => {
-        if (movie) {
-          res.json(movie);
-        } else {
-          res.status(404).json({ error: 'Movie not found' });
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        res.status(500).json({ error: 'Error retrieving movie' });
-      });
-  }
-);
+// GET /movies/:title - Returns data about a specific movie by title
+app.get('/movies/:title', (req, res) => {
+  const { title } = req.params;
+  Movies.findOne({ title: { $regex: new RegExp('^' + title + '$', 'i') } })
+    .then((movie) => {
+      if (movie) {
+        res.json(movie);
+      } else {
+        res.status(404).json({ error: 'Movie not found' });
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: 'Error retrieving movie' });
+    });
+});
 
-// GET /directors - Returns a list of all distinct directors from the database (JWT protected)
-app.get(
-  '/directors',
-  passport.authenticate('jwt', { session: false }),
-  (req, res) => {
-    Movies.aggregate([
-      { $group: { _id: '$director.name', bio: { $first: '$director.bio' } } },
-    ])
-      .then((directors) => res.json(directors))
-      .catch((err) => {
-        console.error('Error retrieving directors:', err);
-        res.status(500).json({ error: 'Error retrieving directors' });
-      });
-  }
-);
+// GET /directors - Returns a list of all distinct directors from the database
+app.get('/directors', (req, res) => {
+  Movies.aggregate([
+    { $group: { _id: '$director.name', bio: { $first: '$director.bio' } } },
+  ])
+    .then((directors) => res.json(directors))
+    .catch((err) => {
+      console.error('Error retrieving directors:', err);
+      res.status(500).json({ error: 'Error retrieving directors' });
+    });
+});
 
-// GET /genres - Returns a list of all distinct genres from the database (JWT protected)
-app.get(
-  '/genres',
-  passport.authenticate('jwt', { session: false }),
-  (req, res) => {
-    Movies.aggregate([
-      {
-        $group: {
-          _id: '$genre.name',
-          description: { $first: '$genre.description' },
-        },
+// GET /genres - Returns a list of all distinct genres from the database
+app.get('/genres', (req, res) => {
+  Movies.aggregate([
+    {
+      $group: {
+        _id: '$genre.name',
+        description: { $first: '$genre.description' },
       },
-    ])
-      .then((genres) => res.json(genres))
-      .catch((err) => {
-        console.error('Error retrieving genres:', err);
-        res.status(500).json({ error: 'Error retrieving genres' });
-      });
-  }
-);
+    },
+  ])
+    .then((genres) => res.json(genres))
+    .catch((err) => {
+      console.error('Error retrieving genres:', err);
+      res.status(500).json({ error: 'Error retrieving genres' });
+    });
+});
 
-// GET /users - Returns JSON data about all users (JWT protected)
-app.get(
-  '/users',
-  passport.authenticate('jwt', { session: false }),
-  (req, res) => {
-    Users.find()
-      .then((users) => res.json(users))
-      .catch((err) => {
-        console.error('Error retrieving users:', err);
-        res.status(500).json({ error: 'Error retrieving users' });
-      });
-  }
-);
+// GET /users - Returns JSON data about all users
+app.get('/users', (req, res) => {
+  Users.find()
+    .then((users) => res.json(users))
+    .catch((err) => {
+      console.error('Error retrieving users:', err);
+      res.status(500).json({ error: 'Error retrieving users' });
+    });
+});
 
-// POST /users - Allows a new user to register (Public endpoint, no JWT required)
+// POST /users - Allows a new user to register
 app.post('/users', (req, res) => {
   const { username, password, email, birthday } = req.body;
   if (username && password && email && birthday) {
