@@ -5,7 +5,8 @@ const morgan = require('morgan');
 const mongoose = require('mongoose'); // Import Mongoose for MongoDB interactions
 const Models = require('./models.js'); // Import Mongoose models
 const passport = require('passport');
-const cors = require('cors'); // Import CORS to handle cross-origin requests
+const cors = require('cors'); // Import CORS to handle cross-origin
+const { check, validationResult } = require('express-validator');
 
 // Import passport strategies
 require('./passport'); // Passport strategies
@@ -18,9 +19,17 @@ const app = express();
 // Middleware for logging requests
 app.use(morgan('common'));
 
+// CORS options setup (adjust to your needs)
+const corsOptions = {
+  origin: ['http://localhost:4200'], // Replace with your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions)); // Apply CORS with the specified options
+
 // Use JSON parsing for POST/PUT requests
 app.use(express.json());
-app.use(cors()); // Allow cross-origin requests
 
 // Correct MongoDB connection string (using port 27017, not 3000)
 mongoose
@@ -39,77 +48,30 @@ app.get('/', (req, res) => {
   res.send('Welcome to the Movie API!!!');
 });
 
-// GET /movies - Returns JSON data about all movies from the database
-app.get('/movies', (req, res) => {
-  Movies.find()
-    .then((movies) => res.json(movies))
-    .catch((err) => {
-      console.error('Error retrieving movies:', err);
-      res.status(500).json({ error: 'Error retrieving movies' });
-    });
-});
+// POST /users - Allows a new user to register with password hashing and validation
+app.post(
+  '/users',
+  // Validation logic for user registration
+  [
+    check('Username', 'Username is required').isLength({ min: 5 }),
+    check(
+      'Username',
+      'Username contains non-alphanumeric characters - not allowed.'
+    ).isAlphanumeric(),
+    check('Password', 'Password is required').not().isEmpty(),
+    check('Email', 'Email does not appear to be valid').isEmail(),
+    check('Birthday', 'Birthday is required').not().isEmpty(),
+  ],
+  (req, res) => {
+    // Validation result
+    const errors = validationResult(req);
 
-// GET /movies/:title - Returns data about a specific movie by title
-app.get('/movies/:title', (req, res) => {
-  const { title } = req.params;
-  Movies.findOne({ title: { $regex: new RegExp('^' + title + '$', 'i') } })
-    .then((movie) => {
-      if (movie) {
-        res.json(movie);
-      } else {
-        res.status(404).json({ error: 'Movie not found' });
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).json({ error: 'Error retrieving movie' });
-    });
-});
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
 
-// GET /directors - Returns a list of all distinct directors from the database
-app.get('/directors', (req, res) => {
-  Movies.aggregate([
-    { $group: { _id: '$director.name', bio: { $first: '$director.bio' } } },
-  ])
-    .then((directors) => res.json(directors))
-    .catch((err) => {
-      console.error('Error retrieving directors:', err);
-      res.status(500).json({ error: 'Error retrieving directors' });
-    });
-});
+    const { username, password, email, birthday } = req.body;
 
-// GET /genres - Returns a list of all distinct genres from the database
-app.get('/genres', (req, res) => {
-  Movies.aggregate([
-    {
-      $group: {
-        _id: '$genre.name',
-        description: { $first: '$genre.description' },
-      },
-    },
-  ])
-    .then((genres) => res.json(genres))
-    .catch((err) => {
-      console.error('Error retrieving genres:', err);
-      res.status(500).json({ error: 'Error retrieving genres' });
-    });
-});
-
-// GET /users - Returns JSON data about all users
-app.get('/users', (req, res) => {
-  Users.find()
-    .then((users) => res.json(users))
-    .catch((err) => {
-      console.error('Error retrieving users:', err);
-      res.status(500).json({ error: 'Error retrieving users' });
-    });
-});
-
-// POST /users - Allows a new user to register with password hashing
-app.post('/users', (req, res) => {
-  const { username, password, email, birthday } = req.body;
-
-  if (username && password && email && birthday) {
     // Hash the password before saving the user
     bcrypt.hash(password, 10, (err, hashedPassword) => {
       if (err) {
@@ -130,10 +92,8 @@ app.post('/users', (req, res) => {
           res.status(500).json({ error: 'Error registering user' });
         });
     });
-  } else {
-    res.status(400).json({ error: 'Please provide all required fields' });
   }
-});
+);
 
 // Serve documentation.html file from the public folder
 app.use('/documentation', express.static('public'));
