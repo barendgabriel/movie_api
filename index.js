@@ -4,12 +4,8 @@ const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose'); // Import Mongoose for MongoDB interactions
 const Models = require('./models.js'); // Import Mongoose models
-const passport = require('passport');
 const cors = require('cors'); // Import CORS to handle cross-origin
 const { check, validationResult } = require('express-validator');
-
-// Import passport strategies
-require('./passport'); // Passport strategies
 
 const Movies = Models.Movie; // Assign the Movie model to a constant for easy access
 const Users = Models.User; // Assign the User model to a constant for easy access
@@ -31,17 +27,31 @@ app.use(cors(corsOptions)); // Apply CORS with the specified options
 // Use JSON parsing for POST/PUT requests
 app.use(express.json());
 
-// Correct MongoDB connection string (using port 27017, not 3000)
+// Correct MongoDB Local connection string (using port 27017, not 3000)
+// mongoose
+//   .connect('mongodb://localhost:27017/myFlixDB', {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//   })
+//   .then(() => console.log('Connected to MongoDB'))
+//   .catch((err) => console.error('MongoDB connection error:', err));
+
+// Connecting to Mongo ATlas
 mongoose
-  .connect('mongodb://localhost:27017/myFlixDB', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(
+    'mongodb+srv://benjansen:5j6lX9Y1MdfyYExO@benjansen.pvh5e.mongodb.net/myFlixDB?retryWrites=true&w=majority',
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  )
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
 // Import and use the auth routes for login
 let auth = require('./auth')(app); // Use Auth to handle login and JWT
+const passport = require('passport');
+require('./passport');
 
 // Root GET route with a welcome message
 app.get('/', (req, res) => {
@@ -70,10 +80,12 @@ app.post(
       return res.status(422).json({ errors: errors.array() });
     }
 
-    const { username, password, email, birthday } = req.body;
+    const { Username, Password, Email, Birthday } = req.body;
+
+    console.log(Username, Password);
 
     // Hash the password before saving the user
-    bcrypt.hash(password, 10, (err, hashedPassword) => {
+    bcrypt.hash(Password, 10, (err, hashedPassword) => {
       if (err) {
         console.error(err);
         return res.status(500).json({ error: 'Error hashing password' });
@@ -81,10 +93,10 @@ app.post(
 
       // Create new user with the hashed password
       Users.create({
-        Username: username,
+        Username: Username,
         Password: hashedPassword,
-        Email: email,
-        Birthday: birthday,
+        Email: Email,
+        Birthday: Birthday,
       })
         .then((user) => res.json({ message: 'Registration successful', user }))
         .catch((err) => {
