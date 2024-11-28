@@ -27,20 +27,6 @@ let userSchema = mongoose.Schema({
   FavoriteMovies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Movie' }],
 });
 
-// Add a pre-save hook to hash the password before saving
-userSchema.pre('save', function (next) {
-  const user = this;
-
-  if (!user.isModified('Password')) return next(); // Only hash the password if it's modified or new
-
-  // Hash the password
-  bcrypt.hash(user.Password, 10, (err, hashedPassword) => {
-    if (err) return next(err);
-    user.Password = hashedPassword;
-    next();
-  });
-});
-
 // Function to hash the password
 userSchema.statics.hashPassword = (password) => {
   return bcrypt.hashSync(password, 10);
