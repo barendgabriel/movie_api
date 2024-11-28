@@ -25,36 +25,30 @@ passport.use(
    * @param {string} options.passwordField - The field in the request containing the password.
    * @param {function} callback - The callback to be executed after authentication.
    */
-  new LocalStrategy(
-    {
-      usernameField: 'Username',
-      passwordField: 'Password',
-    },
-    async (username, password, callback) => {
-      console.log(`${username} ${password}`);
-      await Users.findOne({ Username: username })
-        .then((user) => {
-          if (!user) {
-            console.log('incorrect username');
-            return callback(null, false, {
-              message: 'Incorrect username or password.',
-            });
-          }
-          if (!user.validatePassword(password)) {
-            console.log('incorrect password');
-            return callback(null, false, { message: 'Incorrect password.' });
-          }
-          console.log('finished');
-          return callback(null, user);
-        })
-        .catch((error) => {
-          if (error) {
-            console.log(error);
-            return callback(error);
-          }
-        });
-    }
-  )
+  new LocalStrategy(async (username, password, callback) => {
+    console.log(`${username} ${password}`);
+    await Users.findOne({ username: username })
+      .then((user) => {
+        if (!user) {
+          console.log('incorrect username');
+          return callback(null, false, {
+            message: 'Incorrect username or password.',
+          });
+        }
+        if (!user.validatePassword(password)) {
+          console.log('incorrect password');
+          return callback(null, false, { message: 'Incorrect password.' });
+        }
+        console.log('finished');
+        return callback(null, user);
+      })
+      .catch((error) => {
+        if (error) {
+          console.log(error);
+          return callback(error);
+        }
+      });
+  })
 );
 
 passport.use(
