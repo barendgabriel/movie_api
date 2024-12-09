@@ -24,7 +24,7 @@ app.use(express.json());
 // Connect to MongoDB Atlas
 mongoose
   .connect(
-    'mongodb+srv://benjansen:5j6lX9Y1MdfyYExO@benjansen.pvh5e.mongodb.net/myFlixDB?retryWrites=true&w=majority',
+    'mongodb+srv://benjansen:N75k72DfzUZqZBv@benjansen.pvh5e.mongodb.net/myFlixDB?retryWrites=true&w=majority',
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
