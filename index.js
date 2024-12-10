@@ -96,61 +96,45 @@ app.post(
   }
 );
 
-// GET /movies - Returns all movies
-app.get(
-  '/movies',
-  passport.authenticate('jwt', { session: false }),
-  async (req, res) => {
-    await Movies.find()
-      .then((movies) => res.status(200).json(movies))
-      .catch((err) => {
-        console.error(err);
-        res.status(500).send('Error: ' + err);
-      });
-  }
-);
+// GET /movies - Returns all movies (No authentication required)
+app.get('/movies', async (req, res) => {
+  await Movies.find()
+    .then((movies) => res.status(200).json(movies))
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    });
+});
 
-// GET /movies/:title - Returns a movie by title
-app.get(
-  '/movies/:title',
-  passport.authenticate('jwt', { session: false }),
-  async (req, res) => {
-    await Movies.findOne({ title: req.params.title })
-      .then((movie) => res.json(movie))
-      .catch((err) => {
-        console.error(err);
-        res.status(500).send('Error: ' + err);
-      });
-  }
-);
+// GET /movies/:title - Returns a movie by title (No authentication required)
+app.get('/movies/:title', async (req, res) => {
+  await Movies.findOne({ title: req.params.title })
+    .then((movie) => res.json(movie))
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    });
+});
 
-// GET /movies/genre/:genreName - Returns a genre by name
-app.get(
-  '/movies/genre/:genreName',
-  passport.authenticate('jwt', { session: false }),
-  async (req, res) => {
-    await Movies.findOne({ 'genre.name': req.params.genreName })
-      .then((movie) => res.status(200).json(movie.genre))
-      .catch((err) => {
-        console.error(err);
-        res.status(500).send('Error: ' + err);
-      });
-  }
-);
+// GET /movies/genre/:genreName - Returns a genre by name (No authentication required)
+app.get('/movies/genre/:genreName', async (req, res) => {
+  await Movies.findOne({ 'genre.name': req.params.genreName })
+    .then((movie) => res.status(200).json(movie.genre))
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    });
+});
 
-// GET /movies/directors/:directorName - Returns a director by name
-app.get(
-  '/movies/directors/:directorName',
-  passport.authenticate('jwt', { session: false }),
-  async (req, res) => {
-    await Movies.findOne({ 'director.name': req.params.directorName })
-      .then((movie) => res.status(200).json(movie.director))
-      .catch((err) => {
-        console.error(err);
-        res.status(500).send('Error: ' + err);
-      });
-  }
-);
+// GET /movies/directors/:directorName - Returns a director by name (No authentication required)
+app.get('/movies/directors/:directorName', async (req, res) => {
+  await Movies.findOne({ 'director.name': req.params.directorName })
+    .then((movie) => res.status(200).json(movie.director))
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    });
+});
 
 // GET /users - Returns all users
 app.get(
