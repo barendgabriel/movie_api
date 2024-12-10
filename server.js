@@ -40,7 +40,7 @@ const server = http.createServer((request, response) => {
   }
 });
 
-// Listen on port 8080
-server.listen(8080, () => {
-  console.log('Server is running on http://localhost:8080');
+// Listen on port 3000
+server.listen(3000, () => {
+  console.log('Server is running on http://localhost:3000');
 });
