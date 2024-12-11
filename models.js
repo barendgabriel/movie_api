@@ -1,8 +1,8 @@
-const mongoose = require('mongoose'); // Import mongoose
+const mongoose = require('mongoose');
 const bcrypt = require('bcrypt'); // Import bcrypt for password hashing
 
 // Define the movie schema
-let movieSchema = mongoose.Schema({
+const movieSchema = mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   genre: {
@@ -19,12 +19,12 @@ let movieSchema = mongoose.Schema({
 });
 
 // Define the user schema
-let userSchema = mongoose.Schema({
+const userSchema = mongoose.Schema({
   username: { type: String, required: true },
   password: { type: String, required: true },
   email: { type: String, required: true },
   birthday: Date,
-  favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Movie' }],
+  favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Movie' }], // Referencing the movie model for favorites
 });
 
 // Function to hash the password
@@ -38,8 +38,8 @@ userSchema.methods.validatePassword = function (password) {
 };
 
 // Create the Movie and User models
-let Movie = mongoose.model('Movie', movieSchema);
-let User = mongoose.model('User', userSchema);
+const Movie = mongoose.model('Movie', movieSchema);
+const User = mongoose.model('User', userSchema);
 
 // Export the models for use in other files
 module.exports.Movie = Movie;
