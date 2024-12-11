@@ -60,7 +60,6 @@ app.post(
     check('birthday', 'birthday is required').not().isEmpty(),
   ],
   async (req, res) => {
-    // Validation result
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
@@ -68,20 +67,17 @@ app.post(
 
     const { username, password, email, birthday } = req.body;
 
-    // Check if the user already exists
     const existingUser = await Users.findOne({ username });
     if (existingUser) {
       return res.status(400).json({ error: 'Uh-ho! User already exists!' });
     }
 
-    // Hash the password before saving the user
     bcrypt.hash(password, 10, async (err, hashedPassword) => {
       if (err) {
         console.error(err);
         return res.status(500).json({ error: 'Error hashing password' });
       }
 
-      // Create new user with the hashed password
       const newUser = await Users.create({
         username,
         password: hashedPassword,
@@ -96,15 +92,19 @@ app.post(
   }
 );
 
-// GET /movies - Returns all movies (No authentication required)
-app.get('/movies', async (req, res) => {
-  await Movies.find()
-    .then((movies) => res.status(200).json(movies))
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send('Error: ' + err);
-    });
-});
+// GET /movies - Returns all movies (Token-based authentication enabled)
+app.get(
+  '/movies',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    await Movies.find()
+      .then((movies) => res.status(200).json(movies))
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send('Error: ' + err);
+      });
+  }
+);
 
 // GET /movies/:title - Returns a movie by title (No authentication required)
 app.get('/movies/:title', async (req, res) => {
@@ -170,16 +170,15 @@ app.put(
   '/users/:Username',
   passport.authenticate('jwt', { session: false }),
   async (req, res) => {
-    // Hash the password before updating the user
-    const hashedPassword = password ? bcrypt.hashSync(password, 10) : undefined;
-
     const { username, email, password, birthday } = req.body;
+
+    const hashedPassword = password ? bcrypt.hashSync(password, 10) : undefined;
 
     const updateData = {
       username,
       email,
       birthday,
-      ...(hashedPassword && { password: hashedPassword }), // Add hashed password only if provided
+      ...(hashedPassword && { password: hashedPassword }),
     };
 
     await Users.findOneAndUpdate(
