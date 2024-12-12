@@ -7,24 +7,8 @@ let Users = Models.User,
   JWTStrategy = passportJWT.Strategy,
   ExtractJWT = passportJWT.ExtractJwt;
 
-/**
- * Passport configuration file for authentication strategies.
- * - Defines and configures Local and JWT strategies for handling authentication.
- * - LocalStrategy: Authenticates users by checking username and password.
- * - JWTStrategy: Authenticates users by verifying a JSON Web Token.
- * @module passport
- */
+// Local Strategy for username and password authentication
 passport.use(
-  /**
-   * Local Strategy for authenticating users based on username and password.
-   *
-   * @name LocalStrategy
-   * @function
-   * @param {Object} options - Configuration options for LocalStrategy.
-   * @param {string} options.usernameField - The field in the request containing the username.
-   * @param {string} options.passwordField - The field in the request containing the password.
-   * @param {function} callback - The callback to be executed after authentication.
-   */
   new LocalStrategy(async (username, password, callback) => {
     await Users.findOne({ username: username })
       .then((user) => {
@@ -49,28 +33,25 @@ passport.use(
   })
 );
 
+// JWT Strategy for authenticating users based on JWT
 passport.use(
-  /**
-   * JWT Strategy for authenticating users based on JWT.
-   *
-   * @name JWTStrategy
-   * @function
-   * @param {Object} options - Configuration options for JWTStrategy.
-   * @param {function} jwtFromRequest - Function to extract JWT token from request header.
-   * @param {string} secretOrKey - Secret key to verify the JWT.
-   * @param {function} callback - The callback to be executed after JWT verification.
-   */
   new JWTStrategy(
     {
       jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-      secretOrKey: process.env.JWT_SECRET || 'your_jwt_secret', // Use environment variable or fallback value
+      secretOrKey: process.env.JWT_SECRET || 'your_jwt_secret', // Check the secret here
     },
     async (jwtPayload, callback) => {
+      console.log('JWT Payload:', jwtPayload); // Add debugging log for the payload
       return await Users.findById(jwtPayload._id)
         .then((user) => {
+          if (!user) {
+            console.log('User not found in JWT strategy');
+            return callback(null, false, { message: 'User not found' });
+          }
           return callback(null, user);
         })
         .catch((error) => {
+          console.log('Error in JWT strategy:', error);
           return callback(error);
         });
     }
