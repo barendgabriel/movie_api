@@ -99,6 +99,94 @@ app.get(
   }
 );
 
+// Get all movies
+app.get(
+  '/movies',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      const movies = await Movies.find(); // Fetch all movies from the database
+      res.status(200).json(movies); // Send movies as JSON
+    } catch (err) {
+      res.status(500).send('Error retrieving movies');
+    }
+  }
+);
+
+// Get a movie by ID
+app.get(
+  '/movies/:id',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      const movie = await Movies.findById(req.params.id); // Find the movie by ID
+      if (!movie) return res.status(404).send('Movie not found');
+      res.status(200).json(movie); // Send movie details
+    } catch (err) {
+      res.status(500).send('Error retrieving movie');
+    }
+  }
+);
+
+// Add a new movie (only for authenticated users)
+app.post(
+  '/movies',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    const { title, description, genre, director, year } = req.body;
+    try {
+      const newMovie = new Movies({
+        title,
+        description,
+        genre,
+        director,
+        year,
+      });
+
+      const savedMovie = await newMovie.save(); // Save the new movie to the database
+      res.status(201).json(savedMovie); // Return the newly created movie
+    } catch (err) {
+      res.status(500).send('Error saving movie');
+    }
+  }
+);
+
+// Update a movie by ID (only for authenticated users)
+app.put(
+  '/movies/:id',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    const { title, description, genre, director, year } = req.body;
+    try {
+      const updatedMovie = await Movies.findByIdAndUpdate(
+        req.params.id,
+        { title, description, genre, director, year },
+        { new: true } // Return the updated document
+      );
+
+      if (!updatedMovie) return res.status(404).send('Movie not found');
+      res.status(200).json(updatedMovie); // Return the updated movie details
+    } catch (err) {
+      res.status(500).send('Error updating movie');
+    }
+  }
+);
+
+// Delete a movie by ID (only for authenticated users)
+app.delete(
+  '/movies/:id',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      const deletedMovie = await Movies.findByIdAndDelete(req.params.id); // Delete the movie
+      if (!deletedMovie) return res.status(404).send('Movie not found');
+      res.status(200).send('Movie deleted'); // Confirm movie deletion
+    } catch (err) {
+      res.status(500).send('Error deleting movie');
+    }
+  }
+);
+
 // Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
