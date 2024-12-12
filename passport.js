@@ -26,7 +26,6 @@ passport.use(
    * @param {function} callback - The callback to be executed after authentication.
    */
   new LocalStrategy(async (username, password, callback) => {
-    console.log(`${username} ${password}`);
     await Users.findOne({ username: username })
       .then((user) => {
         if (!user) {
@@ -39,7 +38,6 @@ passport.use(
           console.log('incorrect password');
           return callback(null, false, { message: 'Incorrect password.' });
         }
-        console.log('finished');
         return callback(null, user);
       })
       .catch((error) => {
@@ -65,7 +63,7 @@ passport.use(
   new JWTStrategy(
     {
       jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-      secretOrKey: 'your_jwt_secret',
+      secretOrKey: process.env.JWT_SECRET || 'your_jwt_secret', // Use environment variable or fallback value
     },
     async (jwtPayload, callback) => {
       return await Users.findById(jwtPayload._id)
