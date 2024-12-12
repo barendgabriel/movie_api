@@ -32,7 +32,7 @@ userSchema.methods.validatePassword = function (password) {
 };
 
 // Create the Movie and User models
-const Movie = mongoose.model('Movie', movieSchema);
+const Movie = mongoose.model('Movie', movieSchema, 'movies'); // Specify collection name as 'movies'
 const User = mongoose.model('User', userSchema);
 
 // Export the models for use in other files
