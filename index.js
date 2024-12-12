@@ -102,19 +102,15 @@ app.get(
   }
 );
 
-// Get all movies
-app.get(
-  '/movies',
-  passport.authenticate('jwt', { session: false }),
-  async (req, res) => {
-    try {
-      const movies = await Movies.find(); // Fetch all movies from the database
-      res.status(200).json(movies); // Send movies as JSON
-    } catch (err) {
-      res.status(500).send('Error retrieving movies');
-    }
+// Get all movies (Temporary: Authentication removed for testing)
+app.get('/movies', async (req, res) => {
+  try {
+    const movies = await Movies.find(); // Fetch all movies from the database
+    res.status(200).json(movies); // Send movies as JSON
+  } catch (err) {
+    res.status(500).send('Error retrieving movies');
   }
-);
+});
 
 // Get a movie by ID
 app.get(
