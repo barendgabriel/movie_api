@@ -99,6 +99,18 @@ app.get(
   }
 );
 
+// Get all movies
+app.get('/movies', async (req, res) => {
+  try {
+    const movies = await Movies.find(); // Fetch all movies from the database
+    if (!movies || movies.length === 0)
+      return res.status(404).send('No movies found');
+    res.status(200).json(movies);
+  } catch (err) {
+    res.status(500).send('Error retrieving movies');
+  }
+});
+
 // Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
