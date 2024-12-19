@@ -15,7 +15,13 @@ const app = express();
 
 // Middleware
 app.use(morgan('common'));
-app.use(cors());
+app.use(
+  cors({
+    origin: ['http://localhost:1234', 'https://myflixmovieapp.onrender.com'], // Allow specific origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow specific HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+  })
+);
 app.use(express.json());
 
 // Connect to MongoDB
