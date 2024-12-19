@@ -55,21 +55,23 @@ app.post(
 
     const { username, password, email, birthday } = req.body;
 
-    const existingUser = await Users.findOne({ username });
-    if (existingUser) {
-      return res.status(400).json({ error: 'User already exists!' });
-    }
+    try {
+      const existingUser = await Users.findOne({ username });
+      if (existingUser) {
+        return res.status(400).json({ error: 'User already exists!' });
+      }
 
-    // Skipping password hashing temporarily
-    const newUser = await Users.create({
-      username,
-      password,
-      email,
-      birthday,
-    });
+      // Skipping password hashing temporarily
+      const newUser = await Users.create({
+        username,
+        password,
+        email,
+        birthday,
+      });
 
-    if (newUser) {
       return res.json({ message: 'Registration successful', newUser });
+    } catch (error) {
+      res.status(500).send('Error registering user');
     }
   }
 );
@@ -84,7 +86,9 @@ app.post('/login', (req, res, next) => {
     req.login(user, { session: false }, (err) => {
       if (err) return res.send(err);
 
-      const token = jwt.sign(user.toJSON(), 'your_jwt_secret');
+      const token = jwt.sign(user.toJSON(), 'your_jwt_secret', {
+        expiresIn: '7d', // Token expiry for better security
+      });
       return res.json({ user, token });
     });
   })(req, res, next);
