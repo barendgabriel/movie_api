@@ -20,6 +20,7 @@ app.use(
     origin: ['http://localhost:1234', 'https://myflixmovieapp.onrender.com'], // Allow specific origins
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow specific HTTP methods
     allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+    credentials: true, // Allow credentials (cookies, authorization headers)
   })
 );
 app.use(express.json());
@@ -42,10 +43,10 @@ app.get('/', (req, res) => {
 app.post(
   '/users',
   [
-    check('username', 'username is required').isLength({ min: 5 }),
-    check('password', 'password is required').not().isEmpty(),
-    check('email', 'email does not appear to be valid').isEmail(),
-    check('birthday', 'birthday is required').not().isEmpty(),
+    check('username', 'Username is required').isLength({ min: 5 }),
+    check('password', 'Password is required').not().isEmpty(),
+    check('email', 'Email does not appear to be valid').isEmail(),
+    check('birthday', 'Birthday is required').not().isEmpty(),
   ],
   async (req, res) => {
     const errors = validationResult(req);
