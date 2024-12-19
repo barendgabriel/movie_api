@@ -65,7 +65,7 @@ app.post(
       // Skipping password hashing temporarily
       const newUser = await Users.create({
         username,
-        password,
+        password, // Store plain-text password (not secure)
         email,
         birthday,
       });
@@ -87,6 +87,7 @@ app.post('/login', (req, res, next) => {
     req.login(user, { session: false }, (err) => {
       if (err) return res.send(err);
 
+      // Issue a JWT token
       const token = jwt.sign(user.toJSON(), 'your_jwt_secret', {
         expiresIn: '7d', // Token expiry for better security
       });
