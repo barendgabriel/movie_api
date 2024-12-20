@@ -1,33 +1,54 @@
 const http = require('http');
 const fs = require('fs');
+const path = require('path');
+const mongoose = require('mongoose');
+const Grid = require('gridfs-stream');
 const url = require('url');
+
+// MongoDB URI and connection
+const mongoURI = 'your_mongodb_connection_string'; // Use your actual MongoDB URI here
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true });
+
+const connection = mongoose.connection;
+let gfs;
+
+connection.once('open', () => {
+  // Initialize GridFS Stream
+  gfs = Grid(connection.db, mongoose.mongo);
+  gfs.collection('images'); // The name of the collection where images are stored
+});
 
 const server = http.createServer((request, response) => {
   const parsedUrl = url.parse(request.url, true);
-  const path = parsedUrl.pathname;
+  const pathname = parsedUrl.pathname;
 
-  // Log the request URL and timestamp to log.txt
-  const logMessage = `${new Date().toISOString()} - Requested URL: ${
-    request.url
-  }\n`;
-  fs.appendFile('log.txt', logMessage, (err) => {
-    if (err) throw err;
-  });
+  // Check if the requested URL is for an image
+  if (pathname.startsWith('/images/')) {
+    const imageId = pathname.split('/images/')[1]; // Extract the image ID from the URL
 
-  // Check if the requested URL contains the word "documentation"
-  if (path === '/documentation') {
-    // Serve the documentation.html file
-    fs.readFile('documentation.html', (err, data) => {
-      if (err) {
-        response.writeHead(500, { 'Content-Type': 'text/plain' });
-        response.end('500 - Internal Server Error');
-      } else {
-        response.writeHead(200, { 'Content-Type': 'text/html' });
-        response.end(data);
+    // Retrieve the image from MongoDB
+    gfs.files.findOne(
+      { _id: mongoose.Types.ObjectId(imageId) },
+      (err, file) => {
+        if (err || !file) {
+          response.writeHead(404, { 'Content-Type': 'text/plain' });
+          response.end('404 - Image Not Found');
+          return;
+        }
+
+        // Set the proper content type based on the file's extension
+        const fileType = file.contentType || 'application/octet-stream';
+        response.writeHead(200, { 'Content-Type': fileType });
+
+        // Create a stream to send the file data to the client
+        const readStream = gfs.createReadStream({
+          _id: mongoose.Types.ObjectId(imageId),
+        });
+        readStream.pipe(response);
       }
-    });
+    );
   } else {
-    // Serve the index.html file if another route is accessed
+    // Default route to serve the main index.html
     fs.readFile('index.html', (err, data) => {
       if (err) {
         response.writeHead(404, { 'Content-Type': 'text/plain' });
