@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt'); // Import bcrypt for password hashing
 
 // Define the movie schema
 const movieSchema = mongoose.Schema({
@@ -26,9 +27,14 @@ const userSchema = mongoose.Schema({
   favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Movie' }], // Referencing the movie model for favorites
 });
 
-// Temporarily disable password hashing by directly comparing passwords
+// Function to hash the password
+userSchema.statics.hashPassword = (password) => {
+  return bcrypt.hashSync(password, 10);
+};
+
+// Method to validate the password during login
 userSchema.methods.validatePassword = function (password) {
-  return password === this.password;
+  return bcrypt.compareSync(password, this.password);
 };
 
 // Create the Movie and User models
