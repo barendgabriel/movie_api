@@ -23,6 +23,8 @@ app.use(cors());
 // Use JSON parsing for POST/PUT requests
 app.use(express.json());
 
+require('./auth')(app);
+
 // Connect to MongoDB Atlas
 mongoose
   .connect(
@@ -62,44 +64,19 @@ app.post(
       return res.status(400).json({ error: 'User already exists!' });
     }
 
-    bcrypt.hash(password, 10, async (err, hashedPassword) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Error hashing password' });
-      }
-
-      const newUser = await Users.create({
-        username,
-        password: hashedPassword,
-        email,
-        birthday,
-      });
-
-      if (newUser) {
-        return res.json({ message: 'Registration successful', newUser });
-      }
+    const hashedPassword = Users.hashPassword(password);
+    const newUser = await Users.create({
+      username,
+      password: hashedPassword,
+      email,
+      birthday,
     });
+
+    if (newUser) {
+      return res.json({ message: 'Registration successful', newUser });
+    }
   }
 );
-
-// POST /login - Login a user and issue a token
-app.post('/login', (req, res, next) => {
-  passport.authenticate('local', { session: false }, (err, user, info) => {
-    if (err || !user) {
-      return res.status(400).json({
-        message: 'Something went wrong.',
-        user: user,
-      });
-    }
-
-    req.login(user, { session: false }, (err) => {
-      if (err) return res.send(err);
-
-      const token = jwt.sign(user.toJSON(), 'your_jwt_secret');
-      return res.json({ user, token });
-    });
-  })(req, res, next);
-});
 
 // GET /users/:username - Get a user's profile
 app.get(
@@ -117,23 +94,54 @@ app.get(
 );
 
 // PUT /users/:username - Update user profile
+/**
+ * Update user info using the PUT method
+ * @function
+ * @name editUserProfile
+ * @param {object} req - Express request object
+ * @param {object} res - Express response object
+ * @param {string} - the user's name (req.params.Username)
+ * @returns {object} - returns a promise containing an object of the single user
+ */
 app.put(
   '/users/:username',
   passport.authenticate('jwt', { session: false }),
+  [
+    check('username', 'username is required').isLength({ min: 5 }),
+    check(
+      'username',
+      'username contains non alphanumeric characters - not allowed'
+    ).isAlphanumeric(),
+    check('password', 'password is required').not().isEmpty(),
+    check('email', 'email does not appear to be valid').isEmail(),
+  ],
   async (req, res) => {
-    try {
-      const user = await Users.findOne({ username: req.params.username });
-      if (!user) return res.status(404).send('User not found');
-
-      const { email, birthday } = req.body;
-      if (email) user.email = email;
-      if (birthday) user.birthday = birthday;
-
-      await user.save();
-      res.status(200).json(user);
-    } catch (err) {
-      res.status(500).send('Error updating user profile');
+    //check validation object for errors
+    let errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
     }
+    let hashedPassword = Users.hashPassword(req.body.password);
+
+    await Users.findOneAndUpdate(
+      { username: req.params.username },
+      {
+        $set: {
+          username: req.body.username,
+          password: hashedPassword,
+          email: req.body.email,
+          birthday: req.body.birthday,
+        },
+      },
+      { new: true }
+    ) // This line makes sure that the updated document is returned
+      .then((updatedUser) => {
+        res.json(updatedUser);
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send('Error: ' + err);
+      });
   }
 );
 
@@ -153,6 +161,18 @@ app.delete(
     }
   }
 );
+
+// Get all movies
+app.get('/movies', async (req, res) => {
+  try {
+    const movies = await Movies.find(); // Fetch all movies from the database
+    if (!movies || movies.length === 0)
+      return res.status(404).send('No movies found');
+    res.status(200).json(movies);
+  } catch (err) {
+    res.status(500).send('Error retrieving movies');
+  }
+});
 
 // GET /movies/:movieId - Get a single movie
 app.get(
@@ -188,7 +208,7 @@ app.post(
 
       user.favorites.push(movie._id);
       await user.save();
-      res.status(200).send('Movie added to favorites');
+      res.status(200).send(user);
     } catch (err) {
       res.status(500).send('Error adding movie to favorites');
     }
@@ -214,7 +234,7 @@ app.delete(
 
       user.favorites.splice(movieIndex, 1);
       await user.save();
-      res.status(200).send('Movie removed from favorites');
+      res.status(200).send(user);
     } catch (err) {
       res.status(500).send('Error removing movie from favorites');
     }
